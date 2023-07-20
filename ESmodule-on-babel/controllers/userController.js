@@ -15,16 +15,24 @@ export const login = catchAsync(async (req, res) => {
   }
 
   if (id !== user.id || pw !== user.pw) {
-    const error = new Error("인증되지 않은 회원입니다.");
-    error.statusCode = 401;
-    throw error;
+    return res.status(401).json({
+      code: 401,
+      message: "unauthorized",
+      data: { message: "인증되지 않은 회원입니다." },
+    });
   }
 
-  const getAccessToken = (await userService.login(id)).accessToken;
-  const accessTokenExp = (await userService.login(id)).accessTokenExp;
+  const { accessToken, accessTokenExp, refreshToken, refreshTokenExp } =
+    await userService.login(id);
+
   return res.status(200).json({
     code: 200,
     message: "Success",
-    data: { accessToken: getAccessToken, accessTokenExp },
+    data: {
+      accessToken,
+      accessTokenExp,
+      refreshToken,
+      refreshTokenExp,
+    },
   });
 });
