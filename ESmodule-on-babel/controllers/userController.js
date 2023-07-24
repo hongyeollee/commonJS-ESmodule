@@ -25,6 +25,10 @@ export const login = catchAsync(async (req, res) => {
   const { accessToken, accessTokenExp, refreshToken, refreshTokenExp } =
     await userService.login(id);
   return res
+    .cookie("accessToken", accessToken, {
+      httpOnly: true,
+      maxAge: accessTokenExp,
+    })
     .cookie("login refreshToken", refreshToken, {
       httpOnly: true,
       maxAge: refreshTokenExp,
