@@ -45,3 +45,15 @@ export const login = catchAsync(async (req, res) => {
       },
     });
 });
+
+export const logout = catchAsync(async (req, res) => {
+  return res
+    .clearCookie("accessToken", {
+      httpOnly: true,
+    })
+    .clearCookie("login refreshToken", {
+      httpOnly: true,
+    })
+    .status(200)
+    .json({ code: 200, message: "Success" });
+});
