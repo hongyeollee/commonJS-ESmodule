@@ -9,7 +9,8 @@ export const createPatient = async (
   phone,
   email,
   address1,
-  address2
+  address2,
+  image
 ) => {
   const enssn = await encryptSsn(ssn);
 
@@ -22,7 +23,8 @@ export const createPatient = async (
     phone,
     email,
     address1,
-    address2
+    address2,
+    image
   );
 };
 
