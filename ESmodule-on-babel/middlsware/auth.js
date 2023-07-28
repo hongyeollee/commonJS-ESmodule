@@ -1,6 +1,5 @@
 import jwt from "jsonwebtoken";
 import { catchAsync } from "../utils/error.js";
-//import * as userController from "../controllers/userController.js";
 
 const secretKey = process.env.JWT_ACCESS_TOKEN_SECRET_KEY;
 

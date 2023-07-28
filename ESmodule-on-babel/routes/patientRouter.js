@@ -2,7 +2,14 @@ import express from "express";
 const router = express.Router();
 
 import * as patientController from "../controllers/patientController.js";
+import checkValidationToken from "../middlsware/auth.js";
+import { upload } from "../middlsware/imageUploader.js";
 
-router.post("/", patientController.createPatient);
+router.post(
+  "/",
+  checkValidationToken,
+  upload.single("file"),
+  patientController.createPatient
+);
 
 export default router;

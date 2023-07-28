@@ -9,8 +9,20 @@ export const createPatient = async (
   phone,
   email,
   address1,
-  address2
+  address2,
+  image
 ) => {
+  let imageUrl = null;
+  let imageSize = null;
+  let imageTxt = null;
+
+  if (image) {
+    //console.log(`이미지 상세정보: `, image);
+    imageUrl = image.path;
+    imageSize = Number(image.encoding.split("")[0]);
+    imageTxt = image.mimetype;
+  }
+
   const queryRunner = appDataSource.createQueryRunner();
   queryRunner.connect();
   queryRunner.startTransaction();
@@ -50,17 +62,31 @@ export const createPatient = async (
       `,
       [patientId.insertId, address1, address2]
     );
+
+    await queryRunner.query(
+      `
+      INSERT INTO patient_image(
+        patientId,
+        imageUrl,
+        imageSize,
+        imageTxt
+      )VALUES(
+        ?,?,?,?
+      )
+      `,
+      [patientId.insertId, imageUrl, imageSize, imageTxt]
+    );
     await queryRunner.commitTransaction();
 
     const result = {
       name,
       ssn,
-      enssn,
       birthDate,
       cellPhone,
       phone,
       email,
-      addresses: [address1, address2],
+      addresses: [{ address1, address2 }],
+      images: [{ imageUrl, imageSize, imageTxt }],
     };
     return result;
   } catch (err) {
