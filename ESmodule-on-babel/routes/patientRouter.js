@@ -12,4 +12,10 @@ router.post(
   patientController.createPatient
 );
 
+router.delete(
+  "/:patientId",
+  //checkValidationToken
+  patientController.deletePatient
+);
+
 export default router;

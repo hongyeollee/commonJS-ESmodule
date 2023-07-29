@@ -28,6 +28,14 @@ export const createPatient = async (
   );
 };
 
+export const deletePatient = async (patientId) => {
+  return await patientDao.deletePatient(patientId);
+};
+
+export const getPatientById = async (patientId) => {
+  return await patientDao.getPatientById(patientId);
+};
+
 const encryptSsn = async (ssn) => {
   const cipher = crypto.createCipheriv(
     process.env.CRYPTO_ALGORITHM,

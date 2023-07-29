@@ -1,7 +1,8 @@
 import multer from "multer";
 import path from "path";
+import fs from "fs";
 
-//업로더의 이미지를 로컬서버에 저장할 수 있도록 설정됨.
+//업로더의 이미지를 로컬서버에 저장 로직
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(
@@ -16,3 +17,13 @@ const storage = multer.diskStorage({
 });
 
 export const upload = multer({ storage });
+
+//파일 삭제를 위한 로직
+export const deleteFile = (filename) => {
+  fs.unlink(filename, (err) => {
+    if (err) {
+      console.error("Error deleting file", err);
+      throw err;
+    }
+  });
+};
