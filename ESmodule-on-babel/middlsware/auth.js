@@ -12,9 +12,26 @@ const checkValidationToken = catchAsync(async (req, res, next) => {
     throw error;
   }
 
-  const decoded = jwt.verify(accessToken, secretKey);
-  req.user = decoded.userId;
-  return next();
+  try {
+    const decoded = jwt.verify(accessToken, secretKey);
+    req.user = decoded.userId;
+    return next();
+  } catch (error) {
+    if (error instanceof jwt.TokenExpiredError) {
+      const expiredError = new Error("TOKEN_EXPIRED");
+      expiredError.statusCode = 401;
+      throw expiredError;
+    } else if (error instanceof jwt.JsonWebTokenError) {
+      const invalidTokenError = new Error("INVALID_TOKEN");
+      invalidTokenError.statusCode = 401;
+      throw invalidTokenError;
+    } else {
+      const unexpectedError = new Error("UNEXPECTED_ERROR");
+      unexpectedError.statusCode = 500;
+      console.error(error);
+      throw unexpectedError;
+    }
+  }
 });
 
 export default checkValidationToken;
