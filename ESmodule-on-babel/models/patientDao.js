@@ -36,9 +36,10 @@ export const createPatient = async (
         birthDate,
         cellPhone,
         phone,
-        email
+        email,
+        createdAt
       )VALUES(
-        ?,?,?,?,?,?,?
+        ?,?,?,?,?,?,?,DATE_FORMAT(NOW(), '%Y%m%d%H%i%s')
       )
       `,
       [name, ssn, enssn, birthDate, cellPhone, phone, email]
@@ -55,9 +56,10 @@ export const createPatient = async (
       INSERT INTO patient_address(
         patientId,
         address1,
-        address2
+        address2,
+        createdAt
       )VALUES(
-        ?,?,?
+        ?,?,?,DATE_FORMAT(NOW(), '%Y%m%d%H%i%s')
       )
       `,
       [patientId.insertId, address1, address2]
@@ -69,9 +71,10 @@ export const createPatient = async (
         patientId,
         imageUrl,
         imageSize,
-        imageTxt
+        imageTxt,
+        createdAt
       )VALUES(
-        ?,?,?,?
+        ?,?,?,?,DATE_FORMAT(NOW(), '%Y%m%d%H%i%s')
       )
       `,
       [patientId.insertId, imageUrl, imageSize, imageTxt]
