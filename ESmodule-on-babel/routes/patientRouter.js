@@ -14,7 +14,7 @@ router.post(
 
 router.delete(
   "/:patientId",
-  //checkValidationToken
+  checkValidationToken,
   patientController.deletePatient
 );
 
