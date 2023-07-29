@@ -99,3 +99,60 @@ export const createPatient = async (
     await queryRunner.release();
   }
 };
+
+export const deletePatient = async (patientId) => {
+  const queryRunner = appDataSource.createQueryRunner();
+  await queryRunner.connect();
+  await queryRunner.startTransaction();
+
+  try {
+    await queryRunner.query(
+      `
+      DELETE FROM patient_image
+      WHERE patientId=?;
+      `,
+      [patientId]
+    );
+
+    await queryRunner.query(
+      `
+      DELETE FROM patient_address
+      WHERE patientId=?;
+      `,
+      [patientId]
+    );
+
+    await queryRunner.query(
+      `
+      DELETE FROM patient
+      WHERE patientId=?;
+      `,
+      [patientId]
+    );
+
+    await queryRunner.commitTransaction();
+  } catch (err) {
+    await queryRunner.rollbackTransaction();
+    console.error(err);
+    const error = new Error("FAILED_DELETE_PATIENT");
+    error.statusCode = 400;
+    throw error;
+  } finally {
+    await queryRunner.release();
+  }
+};
+
+export const getPatientById = async (patientId) => {
+  const data = await appDataSource.query(
+    `
+    SELECT
+      imageUrl
+    FROM
+      patient_image
+    where
+      patientId=?
+    `,
+    [patientId]
+  );
+  return data;
+};
