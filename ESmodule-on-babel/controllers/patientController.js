@@ -32,7 +32,6 @@ export const createPatient = catchAsync(async (req, res) => {
 });
 
 export const deletePatient = catchAsync(async (req, res) => {
-  //환자정보 삭제할때 저장된 image도 삭제할 수 있는 기능이 추가되어야 한다.
   const { patientId } = req.params;
   const [getPatientById] = await patientService.getPatientById(patientId);
 
@@ -56,4 +55,18 @@ export const deletePatient = catchAsync(async (req, res) => {
   await patientService.deletePatient(patientId, filename);
 
   return res.status(200).json({ code: 200, message: "Success" });
+});
+
+export const getPatient = catchAsync(async (req, res) => {
+  const { patientId } = req.params;
+
+  if (!patientId) {
+    const error = new Error("NOT_EXIST_PATIENT");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const data = await patientService.getPatient(patientId);
+
+  return res.status(200).json({ code: 200, message: "Success", data });
 });

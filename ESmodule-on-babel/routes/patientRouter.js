@@ -18,4 +18,10 @@ router.delete(
   patientController.deletePatient
 );
 
+router.get(
+  "/:patientId",
+  //checkValidationToken,
+  patientController.getPatient
+);
+
 export default router;
