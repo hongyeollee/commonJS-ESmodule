@@ -159,3 +159,47 @@ export const getPatientById = async (patientId) => {
   );
   return data;
 };
+
+export const getPatient = async (patientId) => {
+  const result = await appDataSource.query(
+    `
+    SELECT
+      p.patientId AS patientId,
+      p.name AS name,
+      p.ssn AS ssn,
+      p.enssn AS encssn,
+      p.birthDate AS birthDate,
+      p.cellPhone AS cellPhone,
+      p.phone AS phone,
+      ANY_VALUE(pi.imageUrl) AS imageUrl,
+      JSON_ARRAYAGG(
+        JSON_OBJECT(
+          'address1', pa.address1,
+          'address2', pa.address2,
+          'createdAt', pa.createdAt
+        )
+      ) AS addresses,
+      JSON_ARRAYAGG(
+        JSON_OBJECT(
+          'imageUrl', pi.imageUrl,
+          'imageSize', pi.imageSize,
+          'imageTxt', pi.imageTxt,
+          'createdAt', pi.createdAt
+        )
+      ) AS images,
+      p.createdAt AS createdAt
+    FROM
+      patient p
+    JOIN
+      patient_address pa ON p.patientId = pa.patientId
+    JOIN
+      patient_image pi ON p.patientId = pi.patientId
+    WHERE
+      p.patientId =?
+    GROUP BY
+      p.patientId
+    `,
+    [patientId]
+  );
+  return result;
+};
