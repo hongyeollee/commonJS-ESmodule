@@ -20,8 +20,15 @@ router.delete(
 
 router.get(
   "/:patientId",
-  //checkValidationToken,
+  checkValidationToken, //
   patientController.getPatient
+);
+
+router.patch(
+  "/:patientId",
+  //checkValidationToken,
+  upload.single("file"),
+  patientController.updatePatient
 );
 
 export default router;
