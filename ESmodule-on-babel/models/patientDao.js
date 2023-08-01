@@ -145,7 +145,22 @@ export const deletePatient = async (patientId) => {
   }
 };
 
-export const getPatientById = async (patientId) => {
+export const getImageInfoByPatientId = async (patientId) => {
+  const data = await appDataSource.query(
+    `
+    SELECT
+      *
+    FROM
+      patient_image
+    where
+      patientId=?
+    `,
+    [patientId]
+  );
+  return await data;
+};
+
+export const getImageUrlByPatientId = async (patientId) => {
   const data = await appDataSource.query(
     `
     SELECT
@@ -157,7 +172,7 @@ export const getPatientById = async (patientId) => {
     `,
     [patientId]
   );
-  return data;
+  return await data;
 };
 
 export const getPatient = async (patientId) => {
@@ -198,6 +213,137 @@ export const getPatient = async (patientId) => {
       p.patientId =?
     GROUP BY
       p.patientId
+    `,
+    [patientId]
+  );
+  return result;
+};
+
+export const updatePatient = async (
+  name,
+  ssn,
+  enssn,
+  birthDate,
+  cellPhone,
+  phone,
+  email,
+  address1,
+  address2,
+  image,
+  patientId
+) => {
+  const existingImageInfo = await getImageInfoByPatientId(patientId);
+
+  let imageUrl = await existingImageInfo.imageUrl;
+  let imageSize = await existingImageInfo.imageSize;
+  let imageTxt = await existingImageInfo.imageTxt;
+
+  if (image) {
+    //console.log(`이미지 상세정보: `, image);
+    imageUrl = image.path;
+    imageSize = Number(image.encoding.split("")[0]);
+    imageTxt = image.mimetype;
+  }
+
+  const queryRunner = appDataSource.createQueryRunner();
+  queryRunner.connect();
+  queryRunner.startTransaction();
+  try {
+    await queryRunner.query(
+      `
+      UPDATE
+        patient
+      SET
+        name= COALESCE(?,name),
+        ssn= COALESCE(?,ssn),
+        enssn= COALESCE(?,enssn),
+        birthDate= COALESCE(?,birthDate),
+        cellPhone= COALESCE(?,cellPhone),
+        phone= COALESCE(?, phone),
+        email= COALESCE(?, email),
+        createdAt=DATE_FORMAT(NOW(),'%Y%m%d%H%i%s')
+      WHERE
+        patientId=?
+      `,
+      [name, ssn, enssn, birthDate, cellPhone, phone, email, patientId]
+    );
+
+    await queryRunner.query(
+      `
+      UPDATE
+        patient_address
+      SET
+        address1 = COALESCE(?, address1),
+        address2 = COALESCE(?, address2),
+        createdAt=DATE_FORMAT(NOW(),'%Y%m%d%H%i%s')
+      WHERE
+        patientId=?
+      `,
+      [address1, address2, patientId]
+    );
+
+    await queryRunner.query(
+      `
+      UPDATE
+        patient_image
+      SET
+        imageUrl= COALESCE(?, imageUrl),
+        imageSize= COALESCE(?, imageSize),
+        imageTxt= COALESCE(?, imageTxt),
+        createdAt=DATE_FORMAT(NOW(), '%Y%m%d%H%i%s')
+      WHERE
+        patientId=?
+      `,
+      [imageUrl, imageSize, imageTxt, patientId]
+    );
+    await queryRunner.commitTransaction();
+
+    const result = {
+      name,
+      ssn,
+      birthDate,
+      cellPhone,
+      phone,
+      email,
+      addresses: [{ address1, address2 }],
+      images: [{ imageUrl, imageSize, imageTxt }],
+    };
+    return result;
+  } catch (err) {
+    await queryRunner.rollbackTransaction();
+    console.error(err);
+    const error = new Error("FAILED_UPDATE_PATIENT");
+    error.statusCode = 400;
+    throw error;
+  } finally {
+    await queryRunner.release();
+  }
+};
+
+export const getPatientSsnByPatientId = async (patientId) => {
+  const [result] = await appDataSource.query(
+    `
+    SELECT
+      ssn
+    FROM
+      patient
+    where
+      patientId=?
+    `,
+    [patientId]
+  );
+  return result.ssn;
+};
+
+export const getIdByPatientId = async (patientId) => {
+  const [result] = await appDataSource.query(
+    `
+    SELECT
+      patientId
+    FROM
+      patient
+    WHERE
+      patientId=?
     `,
     [patientId]
   );

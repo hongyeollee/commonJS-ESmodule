@@ -32,12 +32,48 @@ export const deletePatient = async (patientId) => {
   return await patientDao.deletePatient(patientId);
 };
 
-export const getPatientById = async (patientId) => {
-  return await patientDao.getPatientById(patientId);
+export const getImageInfoByPatientId = async (patientId) => {
+  return await patientDao.getImageInfoByPatientId(patientId);
+};
+
+export const getIdByPatientId = async (patientId) => {
+  return await patientDao.getIdByPatientId(patientId);
 };
 
 export const getPatient = async (patientId) => {
   return await patientDao.getPatient(patientId);
+};
+
+export const updatePatient = async (
+  name,
+  ssn,
+  birthDate,
+  cellPhone,
+  phone,
+  email,
+  address1,
+  address2,
+  image,
+  patientId
+) => {
+  const ExistSsn = await patientDao.getPatientSsnByPatientId(patientId);
+  let enssn = null;
+  if (ssn) enssn = await encryptSsn(ssn);
+  if (!ssn) enssn = await ExistSsn.enssn;
+
+  return await patientDao.updatePatient(
+    name,
+    ssn,
+    enssn,
+    birthDate,
+    cellPhone,
+    phone,
+    email,
+    address1,
+    address2,
+    image,
+    patientId
+  );
 };
 
 const encryptSsn = async (ssn) => {
@@ -51,7 +87,7 @@ const encryptSsn = async (ssn) => {
   return (enssn += cipher.final("base64"));
 };
 
-const decryptSsn = async (enssn) => {
+export const decryptSsn = async (enssn) => {
   const decipher = crypto.createDecipheriv(
     process.env.CRYPTO_ALGORITHM,
     process.env.CRYPTO_KEY,

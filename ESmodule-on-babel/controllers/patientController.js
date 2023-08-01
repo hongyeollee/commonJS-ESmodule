@@ -33,14 +33,16 @@ export const createPatient = catchAsync(async (req, res) => {
 
 export const deletePatient = catchAsync(async (req, res) => {
   const { patientId } = req.params;
-  const [getPatientById] = await patientService.getPatientById(patientId);
+  const [getImageInfoByPatientId] =
+    await patientService.getImageInfoByPatientId(patientId);
+  const existPatientInfo = await patientService.getIdByPatientId(patientId);
 
-  if (!patientId) {
+  if (!existPatientInfo) {
     const error = new Error("NOT_EXIST_PATIENT");
     error.statusCode = 400;
     throw error;
   }
-  const filename = getPatientById.imageUrl;
+  const filename = await getImageInfoByPatientId.imageUrl;
   if (filename) {
     fs.access(filename, fs.constants.F_OK, (err) => {
       if (err) {
@@ -59,14 +61,44 @@ export const deletePatient = catchAsync(async (req, res) => {
 
 export const getPatient = catchAsync(async (req, res) => {
   const { patientId } = req.params;
+  const existPatientInfo = await patientService.getIdByPatientId(patientId);
 
-  if (!patientId) {
+  if (!existPatientInfo) {
     const error = new Error("NOT_EXIST_PATIENT");
     error.statusCode = 400;
     throw error;
   }
 
   const data = await patientService.getPatient(patientId);
+
+  return res.status(200).json({ code: 200, message: "Success", data });
+});
+
+export const updatePatient = catchAsync(async (req, res) => {
+  const image = req.file;
+  const { patientId } = req.params;
+  const { name, ssn, birthDate, cellPhone, phone, email, address1, address2 } =
+    req.body;
+  const existPatientInfo = await patientService.getIdByPatientId(patientId);
+
+  if (!existPatientInfo) {
+    const error = new Error("NOT_EXIST_PATIENT");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const data = await patientService.updatePatient(
+    name,
+    ssn,
+    birthDate,
+    cellPhone,
+    phone,
+    email,
+    address1,
+    address2,
+    image,
+    patientId
+  );
 
   return res.status(200).json({ code: 200, message: "Success", data });
 });
