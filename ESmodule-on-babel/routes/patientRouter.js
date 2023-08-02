@@ -3,7 +3,11 @@ const router = express.Router();
 
 import * as patientController from "../controllers/patientController.js";
 import checkValidationToken from "../middlsware/auth.js";
-import { upload } from "../middlsware/imageUploader.js";
+import { createImageUploader } from "../middlsware/imageUploader.js";
+
+const imageStoragePath =
+  "/Users/hongyeol/Desktop/honyeollee/commonJS-ESmodule/ESmodule-on-babel/imageStorage";
+const upload = createImageUploader(imageStoragePath);
 
 router.post(
   "/",
@@ -26,7 +30,7 @@ router.get(
 
 router.patch(
   "/:patientId",
-  //checkValidationToken,
+  checkValidationToken,
   upload.single("file"),
   patientController.updatePatient
 );
